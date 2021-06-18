@@ -36,7 +36,7 @@ thinking =~ x3 + x4 + x20'
 
 ## getting data ready
 
-DataCSV <- #removed for blinding the project
+##DataCSV <- #removed for blinding the project (Instead the data is read in separately)
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='\x89۪' ,replacement="'"))
 DFData <- DataCSV[,c(84,85,87,88)] #questions are in same order
 DFData <- DFData[,-9]
