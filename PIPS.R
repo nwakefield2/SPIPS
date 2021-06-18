@@ -38,7 +38,7 @@ thinking =~ x3 + x4 + x20'
 
 DataCSV <- #removed for blinding the project
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='\x89۪' ,replacement="'"))
-DFData <- DataCSV[,84:105] #questions are in same order
+DFData <- DataCSV[,c(84,85,87,88)] #questions are in same order
 DFData <- DFData[,-9]
 DFData <- DFData[,-13]
 t.f.remove <- apply(DFData, 1, should.remove2) # should row be removed
