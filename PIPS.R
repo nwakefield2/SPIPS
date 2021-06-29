@@ -44,6 +44,27 @@ DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Mostly descriptive' ,repla
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Somewhat descriptive' ,replacement="3"))
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Minimally descriptive' ,replacement="2"))
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Not at all descriptive' ,replacement="1"))
+##This is completely generic up to this point regardless of the file or which columns represent which items.
+
+colnames<-gsub(".*\\.\\.\\.","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
+numberPips<-length(unique(colnames))
+firstoccurance<-c(grep(colnames[1], names(DataCSV)))[1]
+
+
+my_data_list<-list()
+colnamesforloop<-c(names(DataCSV)[1:(firstoccurance-1)],colnames[firstoccurance:(firstoccurance+numberPips-1)])
+for (i in c(1:(length(colnames)/numberPips-1))){
+  my_data_list[[i]]<-DataCSV[,c(1:(firstoccurance-1))]
+  my_data_list[[i]]<-cbind(my_data_list[[i]],DataCSV[,(firstoccurance+numberPips*(i-1)):(firstoccurance+numberPips*(i)-1)])
+  names(my_data_list[[i]])<-colnamesforloop
+  }
+
+masterDataframe<-my_data_list[[1]]
+for (i in c(2:(length(colnames)/numberPips-1))){
+  masterDataframe<-merge(masterDataframe, my_data_list[[i]], all=TRUE)
+}
+
+
 DFData <- DataCSV[,c(82,83,85,88,90,93,94,95,96,97,98,99,107,108,109,110,111,117,118,119,120,121,122)] #questions are in same order
 ##DFData <- DFData[,-9]
 ##DFData <- DFData[,-13]
