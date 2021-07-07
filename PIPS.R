@@ -12,6 +12,10 @@ should.remove2 <- function(row) {
   # FALSE
 }
 
+delete.na <- function(DF, n=0) {
+  DF[rowSums(is.na(DF)) <= n,]
+}
+
 ## github code for this from 
 ## https://gist.github.com/tonosan/cb7581f3459ae7c4217a @tonosan
 ##This function computes the comparative fit index (CFI) for an output of factorial analysis with fa() function
@@ -22,7 +26,7 @@ fa.CFI<-function(x){
     ((x$null.chisq-x$null.dof)-(x$STATISTIC-x$dof))/(x$null.chisq-x$null.dof)
   return(nombre)
 }
-
+library("readxl")
 library("lavaan")
 ## do a confirmatory factor analysis with other data sets - Fall 2019, Spring 2020
 ## see if model holds with these years after cleaning
@@ -36,7 +40,7 @@ thinking =~ x3 + x4 + x20'
 
 ## getting data ready
 
-DataCSV <- read.csv(file.choose())
+DataCSV <- read_excel(file.choose(), sheet = 1)
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='\x89۪' ,replacement="'"))
 #Convert String to Numeric
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Very descriptive' ,replacement="5"))
@@ -46,24 +50,29 @@ DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Minimally descriptive' ,re
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Not at all descriptive' ,replacement="1"))
 ##This is completely generic up to this point regardless of the file or which columns represent which items.
 
-colnames<-gsub(".*\\.\\.\\.","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
+##colnames<-gsub(".*\\.\\.\\.","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
+colnames<-gsub(".*\\-","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
+##Collect all the PIPS data together with first and last name.
+PIPSData<-cbind(DataCSV[,c("Recipient Last Name","Recipient First Name")],DataCSV[c(grep("^PIPS", names(DataCSV)))])
+
+##Count the number of PIPS Questions
 numberPips<-length(unique(colnames))
-firstoccurance<-c(grep(colnames[1], names(DataCSV)))[1]
+firstoccurance<-3
 
 
 my_data_list<-list()
-colnamesforloop<-c(names(DataCSV)[1:(firstoccurance-1)],colnames[firstoccurance:(firstoccurance+numberPips-1)])
-for (i in c(1:(length(colnames)/numberPips-1))){
-  my_data_list[[i]]<-DataCSV[,c(1:(firstoccurance-1))]
-  my_data_list[[i]]<-cbind(my_data_list[[i]],DataCSV[,(firstoccurance+numberPips*(i-1)):(firstoccurance+numberPips*(i)-1)])
+colnamesforloop<-c("First Name","Last Name",colnames[1:numberPips])
+for (i in c(1:(length(colnames)/numberPips))){
+  my_data_list[[i]]<-DataCSV[,c("Recipient Last Name","Recipient First Name")]
+  my_data_list[[i]]<-cbind(my_data_list[[i]],PIPSData[,(firstoccurance+numberPips*(i-1)):(firstoccurance+numberPips*(i)-1)])
   names(my_data_list[[i]])<-colnamesforloop
   }
 
 masterDataframe<-my_data_list[[1]]
-for (i in c(2:(length(colnames)/numberPips-1))){
-  masterDataframe<-merge(masterDataframe, my_data_list[[i]], all=TRUE)
+for (i in c(2:(length(colnames)/numberPips))){
+  masterDataframe<-rbind(masterDataframe, my_data_list[[i]])
 }
-
+masterDataframe<-delete.na(masterDataframe,numberPips-1)
 
 DFData <- DataCSV[,c(82,83,85,88,90,93,94,95,96,97,98,99,107,108,109,110,111,117,118,119,120,121,122)] #questions are in same order
 ##DFData <- DFData[,-9]
