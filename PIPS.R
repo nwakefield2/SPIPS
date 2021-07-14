@@ -42,9 +42,10 @@ collaboration =~ x6 + x7 + x8 + x10 + x15 + x16 + x20
 participation   =~ x13 + x13.1 + x16 + x21
 thinking =~ x3 + x4 + x20'
 
-## What follows is a set of scripts aimed at getting the data ready
-
-DataCSV <- read_excel(file.choose(), sheet = 1)
+## What follows is a set of scripts aimed at getting the data ready This function reads in a dataset and prepares it for release.
+ReadAndPrep.Data<-function(XLSXIn){
+#DataCSV <- read_excel(file.choose(), sheet = 1)
+DataCSV<-XLSXIn
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='\x89۪' ,replacement="'"))
 #Convert String to Numeric
 DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Very descriptive' ,replacement="5"))
@@ -80,8 +81,17 @@ for (i in c(2:(length(colnames)/numberPips))){
   masterDataframe<-rbind(masterDataframe, my_data_list[[i]])
 }
 masterDataframe<-delete.na(masterDataframe,numberPips-1)
+return(masterDataframe)
+}
 
-
+firstset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+secondset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+thirdset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+fourthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+fifthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+sixthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
+sixthset<-eixthset
+mergeddata<-rbind(rbind(rbind(rbind(rbind(firstset,secondset),thirdset),fourthset),fifthset),sixthset)
 
 ##We now work toward conducting the CFI.
 
@@ -114,7 +124,8 @@ PIPSCol=c(" I guide students through major topics as they listen",
           " A wide range of students participate in class",
           " I use strategies to encourage participation from a wide range of students")
 
-DFData <-masterDataframe[,PIPSCol]
+DFData <-mergeddata[,PIPSCol]
+DFData <-mergeddata[,c(3:43)]
 
 
 DFData<-apply(DFData,1,as.numeric)
@@ -127,6 +138,9 @@ DFDataM<-t(DFDataM)
 row.names(DFDataM) <- NULL
 colnames(DFDataM) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
 
+colnames(DFDataM)<-c(1:41)
+
+DFDataM<-DFDataM[,c("x7","x20","x8","x15","x6","x10","x16","x13","x21","x17","x5","x11")]
 
 ## testing data w cfa
 fit <- cfa(cfa.model2, data=DFDataM, estimator="MLM")
@@ -137,3 +151,18 @@ summary(fit, fit.measures=TRUE)
 library("semTools")
 discriminantValidity(fit, cutoff = 0.85)
 
+##CFA failed to have a good CFI so we moved to an EFA
+
+## make correlation 'heat map'
+library("corrplot")
+corrplot(cor(DFDataM), order = "hclust", tl.col='black', tl.cex=.75, method = 'square')
+fit <- princomp(DFDataM, cor=TRUE, na.action=na.omit)
+plot(fit, yaxp=c(0,8,8), main="Scree Plot, PIPS")
+
+## let's look at the factor sets for 2-5 factors
+library("psych")
+library("GPArotation")
+twofactor <- fa(DFDataM,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
+threefactor <- fa(DFDataM,nfactors=3,rotate="promax",fm="minres", alpha = 0.05)
+print(threefactor)
+print(twofactor$loadings, cutoff = 0.32, digits = 6)
