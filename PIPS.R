@@ -14,6 +14,9 @@ should.remove2 <- function(row) {
   # FALSE
 }
 
+
+
+
 ##This function will remove a row made entirely of NA entries.
 delete.na <- function(DF, n=0) {
   DF[rowSums(is.na(DF)) <= n,]
@@ -84,14 +87,18 @@ masterDataframe<-delete.na(masterDataframe,numberPips-1)
 return(masterDataframe)
 }
 
-firstset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-secondset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-thirdset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-fourthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-fifthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-sixthset<-ReadAndPrep.Data(read_excel(file.choose(), sheet = 1))
-sixthset<-eixthset
-mergeddata<-rbind(rbind(rbind(rbind(rbind(firstset,secondset),thirdset),fourthset),fifthset),sixthset)
+library(easycsv)
+folderPath<-choose_dir()
+file.list <- list.files(folderPath,pattern='*.xlsx')
+
+mergeddata<-ReadAndPrep.Data(read_excel(paste(folderPath,file.list[1],sep = ""), sheet = 1))
+for (i in c(2:(length(file.list)))){
+  print(i)
+  tempmergeddata<-ReadAndPrep.Data(read_excel(paste(folderPath,file.list[i],sep = ""), sheet = 1))
+  mergeddata<-rbind(mergeddata,tempmergeddata)
+}
+
+
 
 ##We now work toward conducting the CFI.
 
