@@ -60,8 +60,11 @@ DataCSV <- as.data.frame(sapply(DataCSV,gsub,pattern='Not at all descriptive' ,r
 
 ##colnames<-gsub(".*\\.\\.\\.","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
 colnames<-gsub(".*\\-","",names(DataCSV)[c(grep("^PIPS", names(DataCSV)))])
+DecisionsContentcolnames<-gsub("Decisions_Content(.*)","Decisions_Content",names(DataCSV)[c(grep("Decisions_Content \\- Selected Choice", names(DataCSV)))])
 ##Collect all the PIPS data together with first and last name.
 PIPSData<-cbind(DataCSV[,c("Recipient Last Name","Recipient First Name")],DataCSV[c(grep("^PIPS", names(DataCSV)))])
+DecisionsContentData<-cbind(DataCSV[,c("Recipient Last Name","Recipient First Name")],DataCSV[c(grep("Decisions_Content \\- Selected Choice", names(DataCSV)))])
+DecisionsApproachData<-cbind(DataCSV[,c("Recipient Last Name","Recipient First Name")],DataCSV[c(grep("Decisions_Approach \\- Selected Choice", names(DataCSV)))])
 
 ##Count the number of PIPS Questions
 numberPips<-length(unique(colnames))
@@ -73,9 +76,11 @@ firstoccurance<-3
 ##Hence we aim to build a list of data sets so that each iteration of the pips becomes a new item in the list
 ##The result will then be moved into a single dataframe called master data frame.
 my_data_list<-list()
-colnamesforloop<-c("Last Name","First Name",colnames[1:numberPips])
+colnamesforloop<-c("Last Name","First Name","DecisionsContent","DecisionsApproach",colnames[1:numberPips])
 for (i in c(1:(length(colnames)/numberPips))){
   my_data_list[[i]]<-DataCSV[,c("Recipient Last Name","Recipient First Name")]
+  my_data_list[[i]]<-cbind(my_data_list[[i]],DecisionsContentData[,firstoccurance+i-1])
+  my_data_list[[i]]<-cbind(my_data_list[[i]],DecisionsApproachData[,firstoccurance+i-1])
   my_data_list[[i]]<-cbind(my_data_list[[i]],PIPSData[,(firstoccurance+numberPips*(i-1)):(firstoccurance+numberPips*(i)-1)])
   names(my_data_list[[i]])<-colnamesforloop
   }
@@ -139,8 +144,6 @@ row.names(DFDataM) <- NULL
 colnames(DFDataM) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
 
 
-DFData <-mergeddata[,c(3:43)]
-colnames(DFDataM)<-c(1:41)
 
 
 ## testing data w cfa
@@ -169,7 +172,7 @@ print(twofactor$loadings, cutoff = 0.32, digits = 6)
 
 #A two factor model does not seem to work well so we will move to the whole data set.
 #All this code aims to prepare the data for factor analysis.
-DFData2 <-mergeddata[,c(3:43)]
+DFData2 <-mergeddata[,c(5:45)]
 DFData2<-apply(DFData2,1,as.numeric)
 DFData2<-t(DFData2)
 t.f.remove <- apply(DFData2, 1, should.remove2) # should row be removed
@@ -190,7 +193,82 @@ plot(fit, yaxp=c(0,8,8), main="Scree Plot, PIPS")
 library("psych")
 library("GPArotation")
 twofactor <- fa(DFDataM,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
-print(threefactor)
+print(twofactor)
+print(twofactor$loadings, cutoff = 0.32, digits = 6)
+
+
+
+#We now explore using control for various levels of decision making.
+controlledmergeddata<-subset(mergeddata,DecisionsContent=="Someone else makes most decisions.")
+DFData3 <-controlledmergeddata[,PIPSCol]
+DFData3<-apply(DFData3,1,as.numeric)
+DFData3<-t(DFData3)
+t.f.remove <- apply(DFData3, 1, should.remove2) # should row be removed
+DFData3 <- as.data.frame(DFData3[!t.f.remove, ])
+DFDataM3<-as.matrix(DFData3)
+DFDataM3<-apply(DFDataM3,1,as.numeric)
+DFDataM3<-t(DFDataM3)
+row.names(DFDataM3) <- NULL
+colnames(DFDataM3) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
+
+
+## make correlation 'heat map'
+library("corrplot")
+corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square')
+fit <- princomp(DFDataM3, cor=TRUE)
+plot(fit, yaxp=c(0,8,8), main="Scree Plot, PIPS")
+
+## testing data w cfa
+fit <- cfa(cfa.model2, data=DFDataM3, estimator="MLM")
+summary(fit, fit.measures=TRUE)
+
+
+DecisionContentChoices<-unique(mergeddata[,"DecisionsContent"])
+for (i in DecisionContentChoices){
+  controlledmergeddata<-subset(mergeddata,DecisionsContent==i)
+  DFData3 <-controlledmergeddata[,c(5:45)]
+  DFData3<-apply(DFData3,1,as.numeric)
+  DFData3<-t(DFData3)
+  t.f.remove <- apply(DFData3, 1, should.remove2) # should row be removed
+  DFData3 <- as.data.frame(DFData3[!t.f.remove, ])
+  DFDataM3<-as.matrix(DFData3)
+  DFDataM3<-apply(DFDataM3,1,as.numeric)
+  DFDataM3<-t(DFDataM3)
+  row.names(DFDataM3) <- NULL
+  colnames(DFDataM3) <- c(1:41)
+  ## make correlation 'heat map'
+  library("corrplot")
+  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
+}
+
+
+twofactor <- fa(DFDataM3,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
+print(twofactor)
+print(twofactor$loadings, cutoff = 0.32, digits = 6)
+
+
+DecisionApproachChoices<-na.omit(unique(mergeddata[,"DecisionsApproach"]))
+for (i in DecisionApproachChoices){
+  print(i)
+  controlledmergeddata<-subset(mergeddata,DecisionsApproach==i)
+  DFData3 <-controlledmergeddata[,c(5:45)]
+  DFData3<-apply(DFData3,1,as.numeric)
+  DFData3<-t(DFData3)
+  t.f.remove <- apply(DFData3, 1, should.remove2) # should row be removed
+  print(t.f.remove)
+  DFData3 <- as.data.frame(DFData3[!t.f.remove, ])
+  DFDataM3<-as.matrix(DFData3)
+  DFDataM3<-apply(DFDataM3,1,as.numeric)
+  DFDataM3<-t(DFDataM3)
+  row.names(DFDataM3) <- NULL
+  colnames(DFDataM3) <-c(1:41)
+  ## make correlation 'heat map'
+  library("corrplot")
+  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
+}
+
+twofactor <- fa(DFDataM3,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
+print(twofactor)
 print(twofactor$loadings, cutoff = 0.32, digits = 6)
 
 
