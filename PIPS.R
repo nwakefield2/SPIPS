@@ -249,19 +249,18 @@ print(twofactor$loadings, cutoff = 0.32, digits = 6)
 
 DecisionApproachChoices<-na.omit(unique(mergeddata[,"DecisionsApproach"]))
 for (i in DecisionApproachChoices){
-  print(i)
   controlledmergeddata<-subset(mergeddata,DecisionsApproach==i)
   DFData3 <-controlledmergeddata[,c(5:45)]
   DFData3<-apply(DFData3,1,as.numeric)
   DFData3<-t(DFData3)
   t.f.remove <- apply(DFData3, 1, should.remove2) # should row be removed
-  print(t.f.remove)
   DFData3 <- as.data.frame(DFData3[!t.f.remove, ])
   DFDataM3<-as.matrix(DFData3)
   DFDataM3<-apply(DFDataM3,1,as.numeric)
   DFDataM3<-t(DFDataM3)
   row.names(DFDataM3) <- NULL
   colnames(DFDataM3) <-c(1:41)
+  print(dim(DFDataM3))
   ## make correlation 'heat map'
   library("corrplot")
   corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
