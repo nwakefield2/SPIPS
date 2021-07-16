@@ -99,13 +99,8 @@ for (i in c(2:(length(file.list)))){
 }
 
 
-
 ##We now work toward conducting the CFI.
-
-#The following is commented out because we used it for numerical results. We need a more generic name based version.
-##DFData <- DataCSV[,c(82,83,85,88,90,93,94,95,96,97,98,99,107,108,109,110,111,117,118,119,120,121,122)] #questions are in same order
-##DFData <- DFData[,-9]
-##DFData <- DFData[,-13]
+##The first thing we do is try to follow the work in the SPIPS factor analysis. To this end we choose out the columns that match that work.
 
 PIPSCol=c(" I guide students through major topics as they listen",
           " I provide activities that connect course content to my students' lives and future work",
@@ -131,10 +126,8 @@ PIPSCol=c(" I guide students through major topics as they listen",
           " A wide range of students participate in class",
           " I use strategies to encourage participation from a wide range of students")
 
+#All this code aims to prepare the data for factor analysis.
 DFData <-mergeddata[,PIPSCol]
-DFData <-mergeddata[,c(3:43)]
-
-
 DFData<-apply(DFData,1,as.numeric)
 DFData<-t(DFData)
 t.f.remove <- apply(DFData, 1, should.remove2) # should row be removed
@@ -145,9 +138,10 @@ DFDataM<-t(DFDataM)
 row.names(DFDataM) <- NULL
 colnames(DFDataM) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
 
+
+DFData <-mergeddata[,c(3:43)]
 colnames(DFDataM)<-c(1:41)
 
-DFDataM<-DFDataM[,c("x7","x20","x8","x15","x6","x10","x16","x13","x21","x17","x5","x11")]
 
 ## testing data w cfa
 fit <- cfa(cfa.model2, data=DFDataM, estimator="MLM")
@@ -163,13 +157,40 @@ discriminantValidity(fit, cutoff = 0.85)
 ## make correlation 'heat map'
 library("corrplot")
 corrplot(cor(DFDataM), order = "hclust", tl.col='black', tl.cex=.75, method = 'square')
-fit <- princomp(DFDataM, cor=TRUE, na.action=na.omit)
+fit <- princomp(DFDataM, cor=TRUE)
 plot(fit, yaxp=c(0,8,8), main="Scree Plot, PIPS")
 
 ## let's look at the factor sets for 2-5 factors
 library("psych")
 library("GPArotation")
 twofactor <- fa(DFDataM,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
-threefactor <- fa(DFDataM,nfactors=3,rotate="promax",fm="minres", alpha = 0.05)
 print(threefactor)
 print(twofactor$loadings, cutoff = 0.32, digits = 6)
+
+#A two factor model does not seem to work well so we will move to the whole data set.
+#All this code aims to prepare the data for factor analysis.
+DFData2 <-mergeddata[,c(3:43)]
+DFData2<-apply(DFData2,1,as.numeric)
+DFData2<-t(DFData2)
+t.f.remove <- apply(DFData2, 1, should.remove2) # should row be removed
+DFData2 <- as.data.frame(DFData2[!t.f.remove, ])
+DFDataM2<-as.matrix(DFData2)
+DFDataM2<-apply(DFDataM2,1,as.numeric)
+DFDataM2<-t(DFDataM2)
+row.names(DFDataM2) <- NULL
+colnames(DFDataM2)<-c(1:41)
+
+## make correlation 'heat map'
+library("corrplot")
+corrplot(cor(DFDataM2), order = "hclust", tl.col='black', tl.cex=.75, method = 'square')
+fit <- princomp(DFDataM2, cor=TRUE)
+plot(fit, yaxp=c(0,8,8), main="Scree Plot, PIPS")
+
+## let's look at the factor sets for 2-5 factors
+library("psych")
+library("GPArotation")
+twofactor <- fa(DFDataM,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
+print(threefactor)
+print(twofactor$loadings, cutoff = 0.32, digits = 6)
+
+
