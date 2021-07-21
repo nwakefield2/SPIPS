@@ -45,6 +45,14 @@ collaboration =~ x6 + x7 + x8 + x10 + x15 + x16 + x20
 participation   =~ x13 + x13.1 + x16 + x21
 thinking =~ x3 + x4 + x20'
 
+cfa.model.A <-' student centered  =~ x2 + x3 + + y25 + x4 + y26 + x5 + y27 + x6 + x7 + x8 + x10 + x11 + y29 + y30 + y31
+instructor centered =~ x1 + y23 + y24 + y28 + x12 + y32 + y33 + y34 + y35'
+cfa.model.B <-' student student interactions  =~ y27 + x6 + x7 + x8 +x10 +y30
+content delivery practices =~ x1 + y23 + y24 + y28
+formative assessment   =~ x3 + y25 + y26 + y29 + y31
+student content engagement =~ x2 + x4 + x5 + x11 + x12
+summative assessment =~ y32 + y33 + y34 + y35'
+
 ## What follows is a set of scripts aimed at getting the data ready This function reads in a dataset and prepares it for release.
 ReadAndPrep.Data<-function(XLSXIn){
 #DataCSV <- read_excel(file.choose(), sheet = 1)
@@ -226,6 +234,7 @@ summary(fit, fit.measures=TRUE)
 DecisionContentChoices<-unique(mergeddata[,"DecisionsContent"])
 for (i in DecisionContentChoices){
   controlledmergeddata<-subset(mergeddata,DecisionsContent==i)
+  print(i)
   DFData3 <-controlledmergeddata[,c(5:45)]
   DFData3<-apply(DFData3,1,as.numeric)
   DFData3<-t(DFData3)
@@ -249,6 +258,7 @@ print(twofactor$loadings, cutoff = 0.32, digits = 6)
 
 DecisionApproachChoices<-na.omit(unique(mergeddata[,"DecisionsApproach"]))
 for (i in DecisionApproachChoices){
+  print(i)
   controlledmergeddata<-subset(mergeddata,DecisionsApproach==i)
   DFData3 <-controlledmergeddata[,c(5:45)]
   DFData3<-apply(DFData3,1,as.numeric)
@@ -259,12 +269,21 @@ for (i in DecisionApproachChoices){
   DFDataM3<-apply(DFDataM3,1,as.numeric)
   DFDataM3<-t(DFDataM3)
   row.names(DFDataM3) <- NULL
-  colnames(DFDataM3) <-c(1:41)
+  #colnames(DFDataM3) <-c(1:41)
+  colnames(DFDataM3) <- c("x1","x2","y23","x3","y24","y25","x4","y26","x5","y27","y28","x6","x7","x8","x9","x10","x11","x12","y29","y30","y31","y32","y33","y34","y35","x13","x14","x13.1","x15","x16","z36","z37","z38","z39","z40","x18","x17","x19","x20","x21","x22")
   print(dim(DFDataM3))
   ## make correlation 'heat map'
   library("corrplot")
   corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
-}
+  fit <- cfa(cfa.model.A, data=DFDataM3, estimator="MLM")
+  model_performance(fit,metrics="TLI",verbose=TRUE)
+  #summary(fit, fit.measures=TRUE)
+  }
+
+
+
+
+
 
 twofactor <- fa(DFDataM3,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
 print(twofactor)
