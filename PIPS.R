@@ -135,9 +135,9 @@ PIPSCol=c(" I guide students through major topics as they listen",
           " I explain concepts in this class in a variety of ways",
           " I adjust my teaching based upon what students currently do or do not understand",
           " I give feedback on homework, exams, quizzes, etc.",
-          " I structure class so that students share their ideas (or their group's ideas) during whole class discussions",
-          " A wide range of students participate in class",
-          " I use strategies to encourage participation from a wide range of students")
+          " I structure class so that students share their ideas (or their group's ideas) during whole class discussions", 
+          " I use strategies to encourage participation from a wide range of students",
+          " A wide range of students participate in class")
 
 #All this code aims to prepare the data for factor analysis.
 DFData <-mergeddata[,PIPSCol]
@@ -149,7 +149,7 @@ DFDataM<-as.matrix(DFData)
 DFDataM<-apply(DFDataM,1,as.numeric)
 DFDataM<-t(DFDataM)
 row.names(DFDataM) <- NULL
-colnames(DFDataM) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
+colnames(DFDataM) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x22", "x21")
 
 
 
@@ -217,7 +217,7 @@ DFDataM3<-as.matrix(DFData3)
 DFDataM3<-apply(DFDataM3,1,as.numeric)
 DFDataM3<-t(DFDataM3)
 row.names(DFDataM3) <- NULL
-colnames(DFDataM3) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x21", "x22")
+colnames(DFDataM3) <- c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8","x9", "x10", "x11", "x12", "x13","x14","x13.1", "x15", "x16", "x18", "x17", "x19", "x20", "x22", "x21")
 
 
 ## make correlation 'heat map'
@@ -270,7 +270,7 @@ for (i in DecisionApproachChoices){
   DFDataM3<-t(DFDataM3)
   row.names(DFDataM3) <- NULL
   #colnames(DFDataM3) <-c(1:41)
-  colnames(DFDataM3) <- c("x1","x2","y23","x3","y24","y25","x4","y26","x5","y27","y28","x6","x7","x8","x9","x10","x11","x12","y29","y30","y31","y32","y33","y34","y35","x13","x14","x13.1","x15","x16","z36","z37","z38","z39","z40","x18","x17","x19","x20","x21","x22")
+  colnames(DFDataM3) <- c("x1","x2","y23","x3","y24","y25","x4","y26","x5","y27","y28","x6","x7","x8","x9","x10","x11","x12","y29","y30","y31","y32","y33","y34","y35","x13","x14","x13.1","x15","x16","z36","z37","z38","z39","z40","x18","x17","x19","x20","x22","x21")
   print(dim(DFDataM3))
   ## make correlation 'heat map'
   library("corrplot")
