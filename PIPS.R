@@ -112,6 +112,9 @@ for (i in c(2:(length(file.list)))){
 }
 
 
+write.csv(mergeddata,file.path(folderPath,"mergedout.csv"), row.names = FALSE)
+
+
 ##We now work toward conducting the CFI.
 ##The first thing we do is try to follow the work in the SPIPS factor analysis. To this end we choose out the columns that match that work.
 
