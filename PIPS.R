@@ -234,7 +234,7 @@ summary(fit, fit.measures=TRUE)
 DecisionContentChoices<-unique(mergeddata[,"DecisionsContent"])
 for (i in DecisionContentChoices){
   controlledmergeddata<-subset(mergeddata,DecisionsContent==i)
-  print(i)
+
   DFData3 <-controlledmergeddata[,c(5:45)]
   DFData3<-apply(DFData3,1,as.numeric)
   DFData3<-t(DFData3)
@@ -244,11 +244,28 @@ for (i in DecisionContentChoices){
   DFDataM3<-apply(DFDataM3,1,as.numeric)
   DFDataM3<-t(DFDataM3)
   row.names(DFDataM3) <- NULL
-  colnames(DFDataM3) <- c(1:41)
+  #colnames(DFDataM3) <-c(1:41)
+  colnames(DFDataM3) <- c("x1","x2","y23","x3","y24","y25","x4","y26","x5","y27","y28","x6","x7","x8","x9","x10","x11","x12","y29","y30","y31","y32","y33","y34","y35","x13","x14","x13.1","x15","x16","z36","z37","z38","z39","z40","x18","x17","x19","x20","x21","x22")
   ## make correlation 'heat map'
   library("corrplot")
-  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
-}
+  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square', title=paste(i, " Content")) 
+           if (nrow(DFData3)>50){
+  print(i)
+  fit <- cfa(cfa.model.A, data=DFDataM3, estimator="MLM")
+  print("Using a Two factor Model the TLI score is")
+  print(fitMeasures(fit, "TLI"))
+  fit <- cfa(cfa.model.B, data=DFDataM3, estimator="MLM")
+  print("Using a Five factor Model the TLI score is")
+  print(fitMeasures(fit, "TLI"))
+ }
+  else {
+    print(i)
+    print(" had too few observation ~")
+    print(nrow(DFData3))
+    }
+
+
+  }
 
 
 twofactor <- fa(DFDataM3,nfactors=2,rotate="promax",fm="minres", alpha = 0.05)
@@ -271,13 +288,15 @@ for (i in DecisionApproachChoices){
   row.names(DFDataM3) <- NULL
   #colnames(DFDataM3) <-c(1:41)
   colnames(DFDataM3) <- c("x1","x2","y23","x3","y24","y25","x4","y26","x5","y27","y28","x6","x7","x8","x9","x10","x11","x12","y29","y30","y31","y32","y33","y34","y35","x13","x14","x13.1","x15","x16","z36","z37","z38","z39","z40","x18","x17","x19","x20","x21","x22")
-  print(dim(DFDataM3))
   ## make correlation 'heat map'
   library("corrplot")
-  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square') 
+  corrplot(cor(DFDataM3), order = "hclust", tl.col='black', tl.cex=.75, method = 'square', title=paste(i, " Approach") )
   fit <- cfa(cfa.model.A, data=DFDataM3, estimator="MLM")
-  model_performance(fit,metrics="TLI",verbose=TRUE)
-  #summary(fit, fit.measures=TRUE)
+  print("Using a Two factor Model the TLI score is")
+  print(fitMeasures(fit, "TLI"))
+  fit <- cfa(cfa.model.B, data=DFDataM3, estimator="MLM")
+  print("Using a Five factor Model the TLI score is")
+  print(fitMeasures(fit, "TLI"))
   }
 
 
